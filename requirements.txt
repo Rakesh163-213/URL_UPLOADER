@@ -4,4 +4,3 @@ ffmpeg-python
 Pillow
 tqdm
 flask
-gunicorn
