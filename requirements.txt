@@ -1,0 +1,7 @@
+pyrogram
+yt-dlp
+ffmpeg-python
+Pillow
+tqdm
+flask
+gunicorn
