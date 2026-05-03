@@ -1,24 +1,26 @@
-FROM python:3.10-slim
+# Base image
+FROM python:3.11-slim
 
-WORKDIR /app
+# Avoid prompts during install
+ENV DEBIAN_FRONTEND=noninteractive
 
+# Install ffmpeg + system deps
 RUN apt-get update && \
-    apt-get install -y ffmpeg && \
+    apt-get install -y ffmpeg gcc && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Set working directory
+WORKDIR /app
+
+# Copy only needed files first (better caching)
 COPY requirements.txt .
 
-# Upgrade pip first
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+# Install Python deps
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy rest of project (excluding config.py if in .dockerignore)
 COPY . .
 
-# Check dependencies, skip yt-dlp check if not necessary
-
-# Ensure start.sh is executable (just in case)
-
-
-# Start the bot using your script
-#CMD ["sh", "start.sh"]
+# Run the bot
 CMD ["python3", "bot.py"]
