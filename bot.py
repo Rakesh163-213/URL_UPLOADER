@@ -435,25 +435,19 @@ Your video has been uploaded successfully!"""
         if (user_id, message_id) in progress_messages:
             del progress_messages[(user_id, message_id)]
 
+from threading import Thread
 
-from pyrogram import idle
+def run_progress_loop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.create_task(progress_updater())
+    loop.run_forever()
 
 if __name__ == "__main__":
     print("Starting URL Uploader Bot...")
 
-    async def main():
-        # Start background progress updater
-        asyncio.create_task(progress_updater())
+    # Start progress updater in separate thread
+    Thread(target=run_progress_loop, daemon=True).start()
 
-        # Start bot
-        await app.start()
-
-        print("Bot started successfully!")
-
-        # Keep bot running
-        await idle()
-
-        # Stop bot cleanly
-        await app.stop()
-
-    asyncio.run(main())
+    # Start Pyrogram normally
+    app.run()
