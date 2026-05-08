@@ -46,7 +46,7 @@ class VideoUploader:
             # Extract frame at 1 second using ffmpeg
             (
                 ffmpeg
-                .input(video_path, ss="00:00:01")
+                .input(video_path, ss="00:00:04")
                 .output(
                     thumbnail_path,
                     vframes=1,
