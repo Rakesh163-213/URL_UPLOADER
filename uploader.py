@@ -24,6 +24,56 @@ class VideoUploader:
         keyboard = [[InlineKeyboardButton("❌ Cancel", callback_data="cancel")]]
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
+    def generate_thumbnail(self, video_path):
+        """
+        Generate a thumbnail from video without changing
+        the original frame dimensions.
+
+        Args:
+            video_path: Path to the video file
+
+        Returns:
+            str: Path to generated thumbnail, or None if failed
+        """
+
+        thumbnail_path = None
+
+        try:
+            # Create temporary thumbnail file
+            with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp_file:
+                thumbnail_path = tmp_file.name
+
+            # Extract frame at 1 second using ffmpeg
+            (
+                ffmpeg
+                .input(video_path, ss="00:00:01")
+                .output(
+                    thumbnail_path,
+                    vframes=1,
+                    format="image2",
+                    vcodec="mjpeg"
+                )
+                .overwrite_output()
+                .run(capture_stdout=True, capture_stderr=True)
+            )
+
+            # Ensure image is valid RGB without resizing
+            with Image.open(thumbnail_path) as img:
+                if img.mode != "RGB":
+                    img = img.convert("RGB")
+                    img.save(thumbnail_path, "JPEG", quality=85)
+
+            return thumbnail_path
+
+        except Exception as e:
+            print(f"Error generating thumbnail: {e}")
+
+            # Cleanup temp file
+            if thumbnail_path and os.path.exists(thumbnail_path):
+                os.remove(thumbnail_path)
+
+            return None
+
     def get_video_duration(self, video_path):
         """
         Get video duration using ffmpeg
@@ -42,67 +92,7 @@ class VideoUploader:
             print(f"Error getting video duration: {e}")
             return None
 
-    def generate_thumbnail(self, video_path, size=(320, 320)):
-        """
-        Generate a thumbnail from video using ffmpeg and Pillow
-
-        Args:
-            video_path: Path to the video file
-            size: Thumbnail size (width, height)
-
-        Returns:
-            str: Path to generated thumbnail, or None if failed
-        """
-        thumbnail_path = None
-        try:
-            # Create temporary file for thumbnail
-            with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_file:
-                thumbnail_path = tmp_file.name
-
-            # Extract frame at 1 second using ffmpeg
-            (
-                ffmpeg
-                .input(video_path, ss='00:00:01')
-                .output(thumbnail_path, vframes=1, format='image2', vcodec='mjpeg')
-                .overwrite_output()
-                .run(capture_stdout=True, capture_stderr=True)
-            )
-
-            # Resize and crop using Pillow
-            with Image.open(thumbnail_path) as img:
-                # Convert to RGB if necessary
-                if img.mode != 'RGB':
-                    img = img.convert('RGB')
-
-                # Calculate aspect ratio
-                img_width, img_height = img.size
-
-                # Crop to center square
-                if img_width > img_height:
-                    # Landscape: crop width
-                    left = (img_width - img_height) // 2
-                    right = left + img_height
-                    img = img.crop((left, 0, right, img_height))
-                else:
-                    # Portrait: crop height
-                    top = (img_height - img_width) // 2
-                    bottom = top + img_width
-                    img = img.crop((0, top, img_width, bottom))
-
-                # Resize to target size using proper resampling
-                img = img.resize(size, Image.Resampling.LANCZOS)
-
-                # Save thumbnail
-                img.save(thumbnail_path, 'JPEG', quality=85)
-
-            return thumbnail_path
-
-        except Exception as e:
-            print(f"Error generating thumbnail: {e}")
-            # Clean up temp file if it exists
-            if thumbnail_path and os.path.exists(thumbnail_path):
-                os.remove(thumbnail_path)
-            return None
+    
 
     async def upload_video(self, chat_id, file_path, tracker, caption=None):
         """
@@ -151,7 +141,7 @@ class VideoUploader:
                 chat_id=chat_id,
                 video=file_path,
                 caption=caption,
-                thumb=thumbnail_path,
+                video_cover=thumbnail_path,
                 duration=duration,
                 progress=progress_callback
             )
@@ -216,7 +206,7 @@ class VideoUploader:
                         chat_id=chat_id,
                         video=part_path,
                         caption=part_caption,
-                        thumb=part_thumbnail,
+                        video_cover=part_thumbnail,
                         duration=part_duration
                     )
 
