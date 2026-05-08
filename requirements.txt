@@ -1,5 +1,4 @@
 kurigram
-yt-dlp
 ffmpeg-python
 Pillow
 tqdm
