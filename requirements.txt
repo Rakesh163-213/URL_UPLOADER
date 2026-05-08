@@ -1,8 +1,8 @@
-pyrogram
+kurigram
 yt-dlp
 ffmpeg-python
 Pillow
 tqdm
 flask
-curl_cffi==0.13.0
 tgcrypto
+yt-dlp[default,curl-cffi]
