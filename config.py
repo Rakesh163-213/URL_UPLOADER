@@ -1,8 +1,8 @@
 import os
 # Telegram Bot Configuration
-API_ID = int(os.getenv("api_id",0))  # Your API ID from my.telegram.org
-API_HASH = os.getenv("api_hash","")  # Your API Hash from my.telegram.org
-BOT_TOKEN = os.getenv("bot_token","")  # Your bot token from @BotFather
+API_ID = int(os.getenv("API_ID",0))  # Your API ID from my.telegram.org
+API_HASH = os.getenv("API_HASH","")  # Your API Hash from my.telegram.org
+BOT_TOKEN = os.getenv("BOT_TOKEN","")  # Your bot token from @BotFather
 
 # Download Settings
 MAX_FILE_SIZE = 1.9 * 1024 * 1024 * 1024  # 1.9 GB in bytes
