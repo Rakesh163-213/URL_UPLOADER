@@ -314,7 +314,7 @@ async def progress_updater():
     """Background task to update progress messages every 0.5-1 second for smooth animation"""
     print("Progress updater started")
     while True:
-        await asyncio.sleep(0.5)  # Update every 0.5 seconds for smooth animation
+        await asyncio.sleep(0.3)  # Update every 0.5 seconds for smooth animation
         try:
             # Get all active trackers
             trackers = progress_manager.get_all_trackers()
